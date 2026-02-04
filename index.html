@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VALORANT VP Calculator | Ryzen x Credx</title>
+
+  <style>
+    :root {
+      --teal-primary: #008080;
+      --teal-dark: #006666;
+      --teal-light: #e6f2f2;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --border-color: #e2e8f0;
+      --danger: #ef4444;
+      --verified-blue: #1DA1F2;
+      --success: #22c55e;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-dark: #f1f5f9;
+      --text-light: #ffffff;
+      --border-color: #334155;
+      --teal-light: #134e4a;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Branding Styles */
+    .header-wrapper {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding: 0 10px;
+      position: relative;
+    }
+
+    .brand-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .verified-badge {
+      color: var(--verified-blue);
+      font-size: 1.2rem;
+      animation: pulse-blue 2s infinite;
+    }
+
+    @keyframes pulse-blue {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .official-logo {
+      width: 75px;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .main-container { width: 100%; max-width: 500px; }
+
+    .card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: var(--teal-primary);
+      font-weight: 700;
+      margin: 0 0 20px 0;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hidden { display: none; }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-dark);
+      box-sizing: border-box;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .check-item {
+  transition: 0.2s ease;
+
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background: var(--teal-light);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .check-item:hover { filter: brightness(0.95); }
+    .check-item input { width: auto; margin-right: 12px; transform: scale(1.2); }
+
+    .stats-box, .alt-box {
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      color: white;
+      transition: 0.3s ease;
+    }
+
+    .stats-box { background: var(--teal-primary); }
+    .alt-box { background: #475569; margin-top: 15px; }
+
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; opacity: 0.9; }
+    .stat-total { font-size: 1.8rem; font-weight: 800; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; margin-top: 10px; }
+    .breakdown { font-size: 0.72rem; color: #fff; margin-top: 8px; line-height: 1.4; border-top: 1px dashed rgba(255,255,255,0.4); padding-top: 8px; }
+
+    .btn {
+      background: var(--teal-primary);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      text-transform: uppercase;
+      box-shadow: 0 4px 0 var(--teal-dark);
+      transition: all 0.1s;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--teal-dark); }
+
+    .btn.btn-success {
+      background: var(--success);
+      box-shadow: 0 4px 0 #166534;
+    }
+
+    .btn-reset { background: var(--danger); margin-top: 10px; box-shadow: 0 4px 0 #991b1b; }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin-top: 10px;
+      padding: 20px;
+      background: var(--teal-light);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .footer-note a { color: var(--teal-primary); font-weight: 700; text-decoration: none; }
+    .warning-text { color: #b91c1c; font-weight: 800; display: block; margin-top: 8px; }
+
+    .mode-switch {
+      background: var(--border-color);
+      padding: 4px;
+      border-radius: 10px;
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 500px;
+      justify-content: center;
+    }
+    .mode-btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+    .mode-btn.active { background: var(--teal-primary); color: white; }
+
+    .template-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px; background: var(--bg-color); border-radius: 8px; margin-bottom: 5px;
+    }
+
+    /* ====== Step Cards UI Upgrade ====== */
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      margin-bottom: 14px;
+    }
+
+    .step-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .step-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--teal-primary);
+      color: #fff;
+      font-weight: 900;
+      box-shadow: 0 6px 14px rgba(0,128,128,0.22);
+      flex: 0 0 auto;
+    }
+
+    .step-title {
+      margin: 0;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 900;
+      color: var(--text-dark);
+    }
+
+    .step-sub {
+      margin: 2px 0 0 0;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    .step-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--teal-light);
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+    }
+
+    .checklist-wrap {
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .checklist-wrap::-webkit-scrollbar { width: 8px; }
+    .checklist-wrap::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 999px;
+    }
+
+    .check-item {
+  transition: 0.2s ease;
+ justify-content: flex-start; gap: 10px; user-select: none; }
+    .check-item span { font-weight: 800; color: var(--text-dark); }
+
+    .card-row { display: grid; gap: 12px; }
+    @media (min-width: 520px) { .card-row { grid-template-columns: 1fr 1fr; } }
+
+    .result-card { padding: 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.18); margin-top: 0; }
+
+    .result-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .result-title h3 {
+      margin: 0;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 900;
+      opacity: 0.95;
+      color: #fff;
+    }
+
+    .result-pill {
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: #fff;
+    }
+
+    .cta-card {
+      background: linear-gradient(135deg, var(--teal-primary), var(--teal-dark));
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .cta-card p { margin: 8px 0 0 0; opacity: 0.9; font-weight: 600; font-size: 0.9rem; }
+
+    .btn-cta { background: #ffffff; color: #0f172a; box-shadow: 0 4px 0 rgba(255,70,85,0.55); margin-top: 14px; }
+    .btn-cta:hover { filter: brightness(0.95); }
+
+    .choice-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .choice {
+      flex: 1 1 180px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+      cursor: pointer;
+      user-select: none;
+    }
+    .choice input { width: auto; margin: 0; transform: scale(1.1); }
+    .choice b { font-size: 0.85rem; }
+    .choice small { display:block; opacity: 0.9; font-weight: 600; margin-top:2px; }
+  
+    /* ✅ Step 3 Choice Cards Full Black Text */
+    .choice {
+      background: #ffffff !important;
+    }
+
+    .choice b,
+    .choice small {
+      color: #000 !important;
+    }
+
+  
+    /* ✅ CTA Button Color Update */
+    .btn-cta {
+      background: #ffdf01 !important;
+      color: #000 !important;
+      font-weight: 900;
+    }
+
+
+    /* ✅ Shining Glow Effect for CTA Order Button */
+    .btn.btn-cta{
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(255,223,1,0.55),
+                  0 0 28px rgba(255,223,1,0.35);
+    }
+    .btn.btn-cta::before{
+      content:"";
+      position:absolute;
+      top:0;
+      left:-70%;
+      width:55%;
+      height:100%;
+      background: rgba(255,255,255,0.45);
+      transform: skewX(-25deg);
+    }
+    .btn.btn-cta:hover::before{
+      animation: shineMove 0.9s ease;
+    }
+    @keyframes shineMove{
+      from{ left:-70%; }
+      to{ left:130%; }
+    }
+    .btn.btn-cta:hover{
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 18px rgba(255,223,1,0.85),
+                  0 0 45px rgba(255,223,1,0.65);
+    }
+
+  
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; filter: saturate(0.7); }
+  
+.item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.item-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+.vp-tag {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 70, 85, 0.15);
+  color: #ff4655;
+  border: 1px solid rgba(255, 70, 85, 0.4);
+}
+.check-item:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.18);
+}
+
+
+.note-tag{
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-light);
+  border: 1px solid rgba(255,255,255,0.18);
+  white-space: nowrap;
+}
+.note-tag.hidden{display:none;}
+
+    /* ====== Pricelist Modal ====== */
+    .modal-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal-overlay.show{ display:flex; }
+    .modal{
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--teal-light);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .modal-title{
+      margin:0;
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dark);
+    }
+    .btn-mini{
+      width: auto;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      box-shadow: 0 3px 0 var(--teal-dark);
+    }
+    .btn-ghost{
+      background: transparent;
+      color: var(--text-dark);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 0 rgba(255,70,85,0.55);
+      font-weight: 800;
+    }
+    .modal-body{
+      padding: 14px 16px 16px;
+    }
+    .price-table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .price-table th, .price-table td{
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .price-table th{
+      font-size: 0.72rem;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--text-light);
+    }
+    .price-table td:last-child, .price-table th:last-child{
+      text-align: right;
+      font-weight: 900;
+    }
+    .price-note{
+      margin: 10px 0 0;
+      font-size: 0.82rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+
+
+    .btn-pricelist{
+      background: #ffffff;
+      color: #ff4655;
+      border: 2px solid #ff4655;
+      box-shadow: 0 4px 0 rgba(255,70,85,0.55);
+      font-weight: 900;
+    }
+    .btn-pricelist:hover{
+      transform: translateY(-1px);
+      filter: brightness(0.98);
+    }
+
+</style>
+</head>
+
+<body data-theme="light">
+
+  <div class="header-wrapper">
+    <div class="brand-info">
+      <h1 class="brand-title">Ryzen Discounted Game Credits<span class="verified-badge">✔</span></h1>
+      <span class="brand-subtitle">Precision VP Engine</span>
+    </div>
+    <img src="Valorant_Logo.png" alt="Valorant Logo" class="official-logo" />
+    <img src="Logo_Default.png" alt="Ryzen Logo" class="official-logo" />
+  </div>
+
+  <div class="mode-switch">
+    <button id="btnUser" class="mode-btn active" onclick="showPanel('user')">User</button>
+    <button id="btnAdmin" class="mode-btn" onclick="showPanel('admin')">Admin 🔒</button>
+    <button class="mode-btn" onclick="toggleTheme()">🌓 Mode</button>
+  </div>
+
+  <div class="main-container">
+
+    <div id="panelUser" class="card">
+      <h2>VP Calculator</h2>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="step-left">
+            <div class="step-badge">1</div>
+            <div>
+              <p class="step-title">Select Bundle</p>
+              <p class="step-sub">Pick the specific bundle from the dropdown.</p>
+            </div>
+          </div>
+          <div class="step-actions">
+            <span class="chip">Required</span>
+          </div>
+        </div>
+
+       
+        <div class="inline-row">
+          <select id="bundleSelector"></select>
+          <span class="chip" id="bundleVpChip">0 VP</span>
+        </div>
+        <p style="margin:10px 0 0; color: var(--text-light); font-size: 0.92rem;">
+          If you’re buying a bundle, pick which bundle here. Then tick <b>Bundle</b> in Step 3.
+        </p>
+
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="step-left">
+            <div class="step-badge">2</div>
+            <div>
+              <p class="step-title">Enter Current VP</p>
+              <p class="step-sub">Input your current VP so we can compute how much you still need.</p>
+            </div>
+          </div>
+          <div class="step-actions">
+            <span class="chip">Required</span>
+          </div>
+        </div>
+
+        <label>Current VP</label>
+        <input id="currentVP" type="number" min="0" placeholder="e.g. 350" />
+
+        
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="step-left">
+            <div class="step-badge">3</div>
+            <div>
+              <p class="step-title">Choose Order</p>
+              <p class="step-sub">Tick what you want to purchase (you can select multiple).</p>
+            </div>
+          </div>
+          <div class="step-actions">
+            <span class="chip">Multi-select</span>
+          </div>
+        </div>
+
+        <div class="checklist">
+          <label class="check-item">
+            <input type="checkbox" id="chkBundle" />
+            <div class="item-info">
+              <span class="item-name">Bundle</span>
+              <span class="note-tag hidden" id="bundleNote">Uses Step 1 selection</span>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" id="chkBP" />
+            <div class="item-info">
+              <span class="item-name">Battle Pass (BP)</span>
+              <span class="vp-tag" id="lblBP">0 VP</span>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" id="chkMelee" />
+            <div class="item-info">
+              <span class="item-name">Melee</span>
+              <span class="vp-tag" id="lblMelee">0 VP</span>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" id="chkWeapon" />
+            <div class="item-info">
+              <span class="item-name">Weapon</span>
+              <span class="vp-tag" id="lblWeapon">0 VP</span>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" id="chkCosmetic" />
+            <div class="item-info">
+              <span class="item-name">Player Card / Spray / Gun Buddy</span>
+              <span class="vp-tag" id="lblCosmetic">0 VP</span>
+            </div>
+          </label>
+
+          <div class="inline-row" style="gap:12px; margin-top:10px;">
+            <button class="btn btn-reset" style="width:auto;" onclick="selectCommon()">Select Bundle + BP</button>
+<button class="btn" id="calcBtn" style="width:auto;" onclick="handleCalculation()" disabled>Run Calculator</button>
+          </div>
+        </div>
+      </div>
+<div class="step-card">
+        <div class="step-head">
+          <div class="step-left">
+            <div class="step-badge">4</div>
+            <div>
+              <p class="step-title">Results</p>
+              <p class="step-sub">We’ll recommend the cheapest VP top-up combo based on your needed VP.</p>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-reset" style="width:auto; padding:10px 14px; margin:0;" onclick="resetCalculator()">Reset</button>
+            <button class="btn btn-mini btn-pricelist" style="margin:0;" onclick="openPriceList()">Pricelist</button>
+          </div>
+        </div>
+
+
+		<div class="stats-box result-card">
+            <div class="result-title">
+              <h3>Optimized Cost</h3>
+              <span class="result-pill">Best Value</span>
+            </div>
+
+            <div class="stat-row"><span>Needed VP:</span> <span id="resNeedVP">0 VP</span></div>
+            <div class="stat-row"><span>Top-up VP:</span> <span id="resTopVP">0 VP</span></div>
+            <div class="stat-total">₱<span id="resPHP">0.00</span></div>
+            <div id="vpBreakdown" class="breakdown">Selection results will appear here.</div>
+          </div>
+
+          </div>
+
+<div class="step-card cta-card">
+        <div class="step-head" style="margin-bottom: 0;">
+          <div class="step-left">
+            <div class="step-badge" style="background:#fff; color:#0f172a;">5</div>
+            <div>
+              <p class="step-title" style="color:#fff;">ORDER NOW</p>
+              <p class="step-sub" style="color:rgba(255,255,255,0.9);">Send your VP order note via Messenger.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>Tap the button to copy your order note and open Messenger.</p>
+
+        <button class="btn btn-cta" onclick="orderNow()">ORDER NOW!</button>
+      </div>
+
+      <div class="footer-note">
+        Top up your VALORANT VP at discounted prices only at <br><b>Ryzen Discounted Game Credits!</b><br>
+        Order now: <a href="https://m.me/ryzendiscountedgamecredits" target="_blank" rel="noopener">m.me/ryzendiscountedgamecredits</a><br>
+        <span class="warning-text">Always look for blue check! Beware of posers.</span>
+      </div>
+
+      <div class="footer-note">
+        <b>Want another VP template added?</b><br>
+        Email us at: ryzendiscountedgamecredits@gmail.com
+      </div>
+    </div>
+
+    <div id="panelAdmin" class="card hidden">
+      <h2 style="margin:0;">Admin Panel</h2>
+      <button class="btn btn-reset" style="width: auto; padding: 5px 10px; float: right;" onclick="lockAdmin()">Lock</button>
+      <div style="clear:both; padding-top:10px;"></div>
+
+      </div>
+
+  </div>
+
+  <!-- Pricelist Modal -->
+  <div class="modal-overlay" id="priceModal" role="dialog" aria-modal="true" aria-labelledby="priceTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title" id="priceTitle">VP Pricelist</h3>
+        <button class="btn btn-mini btn-ghost" onclick="closePriceList()">Close</button>
+      </div>
+      <div class="modal-body">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>VP</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody id="priceListBody">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const VP_PACKS = [
+      { vp: 475, php: 194 },
+      { vp: 1000, php: 385 },
+      { vp: 1475, php: 579 },
+      { vp: 2050, php: 776 },
+      { vp: 2525, php: 970 },
+      { vp: 3650, php: 1358 },
+      { vp: 4125, php: 1552 },
+      { vp: 5350, php: 1940 },
+      { vp: 6350, php: 2325 },
+      { vp: 7400, php: 2716 },
+      { vp: 9000, php: 3298 },
+      { vp: 10000, php: 3683 },
+      { vp: 11000, php: 3880 }
+    ];
+
+    // Bundle Sets: each set defines VP costs for items. Admin can edit these.
+    const DEFAULT_BUNDLE_SETS = {
+      "RUN IT BACK: REAVER 3.0 BUNDLE": { bundle: 8720, bp: 1000, melee: 0, weapon: 1775, cosmetic: 0 },
+      "AYAKASHI BUNDLE": { bundle: 7160, bp: 1000, melee: 5350, weapon: 2375, cosmetic: 0 }
+    };
+
+    function loadBundleSets() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('vpBundleSetsDb') || 'null');
+        if (saved && Object.keys(saved).length > 0) return saved;
+      } catch (e) {}
+      localStorage.setItem('vpBundleSetsDb', JSON.stringify(DEFAULT_BUNDLE_SETS));
+      return { ...DEFAULT_BUNDLE_SETS };
+    }
+
+    let bundleSets = loadBundleSets();
+    let adminUnlocked = false;
+
+    function init() {
+      refreshUI();
+      syncItemLabels();
+      updateBundleChip();
+      updateRunBtnState();
+      enforceBundleRule();
+      updateBundleNote();
+
+      const bundleSel = document.getElementById('bundleSelector');
+      if (bundleSel) {
+        bundleSel.addEventListener('change', () => {
+          refreshUI(); // keep dropdown in sync if bundles changed via admin
+          syncItemLabels();
+          updateBundleChip();
+          updateDisplay(0,0,0,"");
+          // when bundle changes, re-apply rules and button state
+          enforceBundleRule();
+          updateBundleNote();
+          updateRunBtnState();
+        });
+      }
+
+      ['chkBundle','chkBP','chkMelee','chkWeapon','chkCosmetic'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => {
+          enforceBundleRule();
+          updateBundleNote();
+          updateBundleChip();
+          syncItemLabels();
+          updateRunBtnState();
+        });
+      });
+    }
+
+    function getSelectedSetName() {
+      return document.getElementById('bundleSelector')?.value || "";
+    }
+
+    function getSelectedSet() {
+      const name = getSelectedSetName();
+      return bundleSets[name] || null;
+    }
+
+    function refreshUI() {
+      const bundleSel = document.getElementById('bundleSelector');
+      if (bundleSel) {
+        const current = bundleSel.value;
+        bundleSel.innerHTML = '';
+        const names = Object.keys(bundleSets).sort((a,b)=>a.localeCompare(b));
+        if (!names.length) {
+          bundleSel.innerHTML = '<option value="">No bundle sets found</option>';
+        } else {
+          names.forEach(n => {
+            bundleSel.innerHTML += `<option value="${n}">${n}</option>`;
+          });
+          // restore selection if possible
+          bundleSel.value = names.includes(current) ? current : names[0];
+        }
+      }
+
+      // Admin list
+      const list = document.getElementById('adminBundleList');
+      if (list) {
+        list.innerHTML = '';
+        Object.keys(bundleSets).sort((a,b)=>a.localeCompare(b)).forEach(name => {
+          const s = bundleSets[name];
+          list.innerHTML += `<div class="template-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <div style="display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px;">
+              <span><b>${name}</b></span>
+              <span style="display:flex; gap:8px;">
+                <button class="btn btn-reset" style="width:auto; padding:5px 10px; margin:0;" onclick="editBundleSet('${name.replace(/'/g,"\\'")}')">Edit</button>
+                <button class="btn btn-reset" style="width:auto; padding:5px 10px; margin:0;" onclick="deleteBundleSet('${name.replace(/'/g,"\\'")}')">X</button>
+              </span>
+            </div>
+            <div style="color: var(--text-light); font-size: 0.92rem;">
+              Bundle: <b>${(s.bundle||0).toLocaleString()}</b> • BP: <b>${(s.bp||0).toLocaleString()}</b> • Melee: <b>${(s.melee||0).toLocaleString()}</b> • Weapon: <b>${(s.weapon||0).toLocaleString()}</b> • Cosmetic: <b>${(s.cosmetic||0).toLocaleString()}</b>
+            </div>
+          </div>`;
+        });
+      }
+    }
+
+    function syncItemLabels() {
+      const set = getSelectedSet();
+      if (!set) return;
+
+      // Update the muted VP text next to items
+      const setText = (vp) => vp ? vp.toLocaleString() + " VP" : "0 VP";
+
+      const bpLbl = document.getElementById('lblBP');
+      const meleeLbl = document.getElementById('lblMelee');
+      const weaponLbl = document.getElementById('lblWeapon');
+      const cosLbl = document.getElementById('lblCosmetic');
+
+      if (bpLbl) bpLbl.textContent = setText(set.bp||0);
+      if (meleeLbl) meleeLbl.textContent = setText(set.melee||0);
+      if (weaponLbl) weaponLbl.textContent = setText(set.weapon||0);
+      if (cosLbl) cosLbl.textContent = setText(set.cosmetic||0);
+    }
+
+    function updateBundleChip() {
+      const chip = document.getElementById('bundleVpChip');
+      const sel = document.getElementById('bundleSelector');
+      const chkBundle = document.getElementById('chkBundle');
+      if (!chip || !sel) return;
+
+      const set = getSelectedSet();
+      const vp = set ? (set.bundle||0) : 0;
+      chip.textContent = vp.toLocaleString() + " VP";
+      chip.style.opacity = (chkBundle && !chkBundle.checked) ? "0.6" : "1";
+    }
+
+
+    function updateBundleNote() {
+      const note = document.getElementById('bundleNote');
+      const chk = document.getElementById('chkBundle');
+      if (!note || !chk) return;
+      note.classList.toggle('hidden', !chk.checked);
+    }
+
+    function updateRunBtnState() {
+      const runBtn = document.getElementById('calcBtn');
+      if (!runBtn) return;
+      const anyChecked = ['chkBundle','chkBP','chkMelee','chkWeapon','chkCosmetic']
+        .some(id => document.getElementById(id)?.checked);
+      runBtn.disabled = !anyChecked;
+    }
+
+    // If Bundle is checked: disable Melee/Weapon/Cosmetic (BP stays available)
+    function enforceBundleRule() {
+      const chkBundle = document.getElementById('chkBundle');
+      const bp = document.getElementById('chkBP');
+      const lock = ['chkMelee','chkWeapon','chkCosmetic'];
+      if (!chkBundle) return;
+
+      if (chkBundle.checked) {
+        lock.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.checked = false; el.disabled = true; }
+        });
+        if (bp) bp.disabled = false;
+      } else {
+        lock.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = false;
+        });
+        if (bp) bp.disabled = false;
+      }
+    }
+
+
+    function showPanel(type) {
+      if (type === 'admin' && !adminUnlocked) {
+        if (prompt("Admin Password:") === "Ryzen2026") adminUnlocked = true;
+        else return;
+      }
+      document.getElementById('panelUser').classList.toggle('hidden', type !== 'user');
+      document.getElementById('panelAdmin').classList.toggle('hidden', type !== 'admin');
+      document.getElementById('btnUser').classList.toggle('active', type === 'user');
+      document.getElementById('btnAdmin').classList.toggle('active', type === 'admin');
+    }
+
+    function lockAdmin() { adminUnlocked = false; showPanel('user'); }
+
+    function resetCalculator() {
+      const vp = document.getElementById('currentVP');
+      if (vp) vp.value = "";
+      clearItems();
+    }
+
+    function selectCommon() {
+      document.getElementById('chkBundle').checked = true;
+      document.getElementById('chkBP').checked = true;
+      updateBundleChip();
+      syncItemLabels();
+      updateRunBtnState();
+          enforceBundleRule();
+          updateBundleNote();
+    }
+
+    function clearItems() {
+      ['chkBundle','chkBP','chkMelee','chkWeapon','chkCosmetic'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = false;
+      });
+      updateBundleChip();
+      updateRunBtnState();
+          enforceBundleRule();
+          updateBundleNote();
+      updateDisplay(0, 0, 0, "");
+    }
+
+    // Cheapest combo to reach at least neededVP.
+    function getCheapestVPCombo(neededVP) {
+      if (neededVP <= 0) return { topVP: 0, php: 0, counts: {} };
+
+      const maxPack = Math.max(...VP_PACKS.map(p=>p.vp));
+      const maxSearch = neededVP + maxPack; // allow overshoot by one biggest pack
+      const dp = new Array(maxSearch + 1).fill(Infinity);
+      const parent = new Array(maxSearch + 1).fill(null);
+      dp[0] = 0;
+
+      for (let i = 0; i <= maxSearch; i++) {
+        if (dp[i] === Infinity) continue;
+        for (let p of VP_PACKS) {
+          const next = i + p.vp;
+          if (next <= maxSearch) {
+            const cost = dp[i] + p.php;
+            if (cost < dp[next]) {
+              dp[next] = cost;
+              parent[next] = { pack: p, prev: i };
+            }
+          }
+        }
+      }
+
+      let bestIdx = neededVP;
+      for (let i = neededVP; i <= maxSearch; i++) {
+        if (dp[i] < dp[bestIdx]) bestIdx = i;
+      }
+
+      let curr = bestIdx;
+      let counts = {};
+      while (curr > 0 && parent[curr]) {
+        const p = parent[curr].pack;
+        counts[p.vp] = (counts[p.vp] || 0) + 1;
+        curr = parent[curr].prev;
+      }
+
+      return { topVP: bestIdx, php: dp[bestIdx], counts };
+    }
+
+    function handleCalculation() {
+      const btn = document.getElementById('calcBtn');
+      const originalText = btn.innerText;
+
+      const ok = calculate();
+      if (ok !== false) {
+        btn.innerText = "Calculation Success!";
+        btn.classList.add('btn-success');
+
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.classList.remove('btn-success');
+        }, 1200);
+      }
+    }
+
+    function calculate() {
+      const setName = getSelectedSetName();
+      const set = getSelectedSet();
+      if (!setName || !set) {
+        alert("Please select a bundle set in Step 1.");
+        return false;
+      }
+
+      const currentVP = parseInt(document.getElementById('currentVP').value, 10) || 0;
+
+      // Safety: if Bundle is checked, Melee/Weapon/Cosmetic must be off
+      if (document.getElementById('chkBundle')?.checked) {
+        const illegal = ['chkMelee','chkWeapon','chkCosmetic'].some(id => document.getElementById(id)?.checked);
+        if (illegal) {
+          alert("Bundle is selected, so Melee/Weapon/Cosmetic are disabled. Untick Bundle to select them.");
+          return false;
+        }
+      }
+
+      const selections = [];
+      let requiredVP = 0;
+
+      if (document.getElementById('chkBundle')?.checked) {
+        selections.push({ name: "Bundle (" + setName + ")", vp: set.bundle || 0 });
+        requiredVP += (set.bundle || 0);
+      }
+      if (document.getElementById('chkBP')?.checked) {
+        selections.push({ name: "Battle Pass (BP)", vp: set.bp || 0 });
+        requiredVP += (set.bp || 0);
+      }
+      if (document.getElementById('chkMelee')?.checked) {
+        selections.push({ name: "Melee", vp: set.melee || 0 });
+        requiredVP += (set.melee || 0);
+      }
+      if (document.getElementById('chkWeapon')?.checked) {
+        selections.push({ name: "Weapon", vp: set.weapon || 0 });
+        requiredVP += (set.weapon || 0);
+      }
+      if (document.getElementById('chkCosmetic')?.checked) {
+        selections.push({ name: "Player Card / Spray / Gun Buddy", vp: set.cosmetic || 0 });
+        requiredVP += (set.cosmetic || 0);
+      }
+
+      if (!selections.length) {
+        alert("Please select at least one item in Step 3.");
+        return false;
+      }
+
+      const neededVP = Math.max(requiredVP - currentVP, 0);
+      const combo = getCheapestVPCombo(neededVP);
+
+      const bdPacks = Object.entries(combo.counts)
+        .sort((a,b)=>Number(b[0])-Number(a[0]))
+        .map(([vp, c]) => `<b>${c}x</b> ${Number(vp).toLocaleString()} VP`)
+        .join(" + ");
+
+      const bdItems = selections
+        .map(s => `• ${s.name} — <b>${(s.vp||0).toLocaleString()} VP</b>`)
+        .join("<br>");
+
+      const bd = `<b>Bundle set:</b> ${setName}<br><br><b>Items:</b><br>${bdItems}<br><br><b>Top-up packs:</b> ${bdPacks || "—"}`;
+
+      updateDisplay(neededVP, combo.topVP, combo.php, bd);
+
+      window.__lastVPSelections = selections;
+      window.__lastRequiredVP = requiredVP;
+      window.__lastSetName = setName;
+
+      return true;
+    }
+
+    function updateDisplay(needVP, topVP, php, bd) {
+      document.getElementById('resNeedVP').innerText = needVP.toLocaleString() + ' VP';
+      document.getElementById('resTopVP').innerText = topVP.toLocaleString() + ' VP';
+      document.getElementById('resPHP').innerText = php.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('vpBreakdown').innerHTML = (bd || "—");
+    }
+
+    
+    function renderPriceList() {
+      const body = document.getElementById('priceListBody');
+      if (!body) return;
+      const rows = VP_PACKS
+        .slice()
+        .sort((a,b)=>a.vp-b.vp)
+        .map(p => `<tr><td><b>${Number(p.vp).toLocaleString()} VP</b></td><td>₱${Number(p.php).toLocaleString()}</td></tr>`)
+        .join("");
+      body.innerHTML = rows || "<tr><td colspan='2'>No pricelist found.</td></tr>";
+    }
+
+    function openPriceList() {
+      renderPriceList();
+      const m = document.getElementById('priceModal');
+      if (m) m.classList.add('show');
+    }
+
+    function closePriceList() {
+      const m = document.getElementById('priceModal');
+      if (m) m.classList.remove('show');
+    }
+
+    function toggleTheme() {
+      document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function orderNow() {
+      const selections = window.__lastVPSelections || [];
+      const requiredVP = window.__lastRequiredVP || 0;
+      const setName = window.__lastSetName || getSelectedSetName();
+      const currentVP = parseInt(document.getElementById('currentVP')?.value, 10) || 0;
+
+      if (!selections.length) {
+        alert("Please run the calculator first.");
+        return;
+      }
+
+      const neededVP = document.getElementById('resNeedVP')?.innerText || "0 VP";
+      const topVP = document.getElementById('resTopVP')?.innerText || "0 VP";
+      const php = document.getElementById('resPHP')?.innerText || "0.00";
+
+      const itemsText = selections
+        .map(s => `- ${s.name} (${(s.vp||0).toLocaleString()} VP)`)
+        .join("\n");
+
+      const msg =
+`Hi Ryzen! I want to order VALORANT VP.
+
+✅ Bundle set: ${setName}
+
+✅ Items:
+${itemsText}
+
+✅ Total Required VP: ${Number(requiredVP).toLocaleString()} VP
+✅ Current VP: ${Number(currentVP).toLocaleString()} VP
+✅ Needed VP: ${neededVP}
+✅ Suggested Top-up: ${topVP} | ₱${php}
+
+(Please confirm availability & ETA. Thank you!)`;
+
+      const proceed = confirm(
+        "You're about to open Messenger.\n\nWe will copy your order note so you can paste it into the chat.\n\nContinue?"
+      );
+      if (!proceed) return;
+
+      const openMessenger = () => window.open("https://m.me/ryzendiscountedgamecredits", "_blank");
+
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(msg).then(() => {
+          openMessenger();
+          alert("✅ Order note copied!\nGo ahead and PASTE the order note in Messenger to place your order.");
+        }).catch(() => {
+          openMessenger();
+          prompt("Copy this message and paste it in Messenger:", msg);
+          alert("✅ After copying, paste the order note in Messenger to place your order.");
+        });
+      } else {
+        openMessenger();
+        prompt("Copy this message and paste it in Messenger:", msg);
+        alert("✅ After copying, paste the order note in Messenger to place your order.");
+      }
+    }
+
+    // Admin: Create / Edit bundle sets (per-item values)
+    function saveBundleSet() {
+      const name = document.getElementById('adminBundleName')?.value.trim();
+      const bundle = parseInt(document.getElementById('adminBundleVP')?.value, 10) || 0;
+      const bp = parseInt(document.getElementById('adminBPVP')?.value, 10) || 0;
+      const melee = parseInt(document.getElementById('adminMeleeVP')?.value, 10) || 0;
+      const weapon = parseInt(document.getElementById('adminWeaponVP')?.value, 10) || 0;
+      const cosmetic = parseInt(document.getElementById('adminCosmeticVP')?.value, 10) || 0;
+
+      if (!name) {
+        alert("Please enter a bundle set name.");
+        return;
+      }
+
+      bundleSets[name] = { bundle, bp, melee, weapon, cosmetic };
+      localStorage.setItem('vpBundleSetsDb', JSON.stringify(bundleSets));
+      refreshUI();
+      syncItemLabels();
+      updateBundleChip();
+      alert("Bundle set saved (Local).");
+    }
+
+    function editBundleSet(name) {
+      const s = bundleSets[name];
+      if (!s) return;
+      document.getElementById('adminBundleName').value = name;
+      document.getElementById('adminBundleVP').value = s.bundle || 0;
+      document.getElementById('adminBPVP').value = s.bp || 0;
+      document.getElementById('adminMeleeVP').value = s.melee || 0;
+      document.getElementById('adminWeaponVP').value = s.weapon || 0;
+      document.getElementById('adminCosmeticVP').value = s.cosmetic || 0;
+      document.getElementById('adminBundleName').focus();
+    }
+
+    function deleteBundleSet(name) {
+      if (confirm("Delete bundle set?")) {
+        delete bundleSets[name];
+        localStorage.setItem('vpBundleSetsDb', JSON.stringify(bundleSets));
+        refreshUI();
+        syncItemLabels();
+        updateBundleChip();
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
+
+
+    // Close modal on outside click / ESC
+    window.addEventListener('click', (e) => {
+      const m = document.getElementById('priceModal');
+      if (!m) return;
+      if (m.classList.contains('show') && e.target === m) closePriceList();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePriceList();
+    });
+</script>
+
+</body>
+</html>
