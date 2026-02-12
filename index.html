@@ -819,9 +819,16 @@ body.has-fixed-footer{
 </div>
 </label>
 <label class="check-item">
+<input id="chkGhost" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Ghost</span>
+<span class="vp-tag" id="lblGhost">0 VP</span>
+</div>
+</label>
+<label class="check-item">
 <input id="chkCosmetic" type="checkbox"/>
 <div class="item-info">
-<span class="item-name">Player Card / Spray / Gun Buddy</span>
+<span class="item-name">Player Card / Spray / Gun Buddy/ Flex</span>
 <span class="vp-tag" id="lblCosmetic">0 VP</span>
 </div>
 </label>
@@ -938,13 +945,13 @@ const VP_PACKS = [
 
     // Bundle Sets: each set defines VP costs for items. Admin can edit these.
     const DEFAULT_BUNDLE_SETS = {
-      "RUN IT BACK: LUNAR 26 CAPSULE": {bundle: 8825, bp:1000, phantom:2175, vandal:1775, operator:1775, cosmetic: 1575} 
+      // NOTE: Ghost is included for per-weapon breakdown (commonly 1775 VP).
+      "RUN IT BACK: LUNAR 26 CAPSULE": {bundle: 8825, bp:1000, phantom:2175, vandal:1775, operator:1775, ghost:1775, cosmetic: 1575} 
     };
 
     function loadBundleSets() {
-      // IMPORTANT:
-      // If the user already has a saved DB in localStorage, we *merge* it with defaults.
-      // This ensures newly-added default bundles (e.g., Lunar) appear automatically.
+      // Load saved templates (if any) then *deep-merge* with defaults so new keys (e.g., ghost)
+      // and new default templates (e.g., Lunar) always appear without overwriting existing admin edits.
       let saved = null;
       try {
         saved = JSON.parse(localStorage.getItem('vpBundleSetsDb') || 'null');
@@ -952,15 +959,36 @@ const VP_PACKS = [
         saved = null;
       }
 
-      const merged = { ...DEFAULT_BUNDLE_SETS, ...(saved && typeof saved === 'object' ? saved : {}) };
+      const baseKeys = ["bundle","bp","phantom","vandal","operator","ghost","cosmetic"];
 
-      // If nothing was saved yet, or merge introduced new defaults, persist the merged version.
+      // Start with defaults
+      const merged = {};
+      Object.keys(DEFAULT_BUNDLE_SETS).forEach(name => {
+        const def = DEFAULT_BUNDLE_SETS[name] || {};
+        merged[name] = { ...Object.fromEntries(baseKeys.map(k => [k, 0])), ...def };
+      });
+
+      // Overlay saved sets (preserving any saved values, but filling missing keys from defaults/0)
+      if (saved && typeof saved === "object") {
+        Object.keys(saved).forEach(name => {
+          const s = saved[name] || {};
+          const def = DEFAULT_BUNDLE_SETS[name] || {};
+          merged[name] = {
+            ...Object.fromEntries(baseKeys.map(k => [k, 0])),
+            ...def,
+            ...s
+          };
+        });
+      }
+
+      // Persist back to storage so future loads are consistent (migration)
       try {
         localStorage.setItem('vpBundleSetsDb', JSON.stringify(merged));
       } catch (e) {}
 
       return merged;
     }
+
 
     let bundleSets = loadBundleSets();
     let adminUnlocked = false;
@@ -987,7 +1015,7 @@ const VP_PACKS = [
         });
       }
 
-      ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkCosmetic'].forEach(id => {
+      ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkGhost','chkCosmetic'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', () => {
           enforceBundleRule();
@@ -1040,7 +1068,7 @@ const VP_PACKS = [
               </span>
             </div>
             <div style="color: var(--text-light); font-size: 0.92rem;">
-              Bundle: <b>${(s.bundle||0).toLocaleString()}</b> • BP: <b>${(s.bp||0).toLocaleString()}</b> • Phantom: <b>${(s.phantom||0).toLocaleString()}</b> • Vandal: <b>${(s.vandal||0).toLocaleString()}</b> • Operator: <b>${(s.operator||0).toLocaleString()}</b> • Cosmetics: <b>${(s.cosmetic||0).toLocaleString()}</b>
+              Bundle: <b>${(s.bundle||0).toLocaleString()}</b> • BP: <b>${(s.bp||0).toLocaleString()}</b> • Phantom: <b>${(s.phantom||0).toLocaleString()}</b> • Vandal: <b>${(s.vandal||0).toLocaleString()}</b> • Operator: <b>${(s.operator||0).toLocaleString()}</b> • Ghost: <b>${(s.ghost||0).toLocaleString()}</b> • Cosmetics: <b>${(s.cosmetic||0).toLocaleString()}</b>
             </div>
           </div>`;
         });
@@ -1057,12 +1085,14 @@ const VP_PACKS = [
       const phantomLbl = document.getElementById('lblPhantom');
       const vandalLbl = document.getElementById('lblVandal');
       const operatorLbl = document.getElementById('lblOperator');
+      const ghostLbl = document.getElementById('lblGhost');
       const cosLbl = document.getElementById('lblCosmetic');
 
       if (bpLbl) bpLbl.textContent = setText(set.bp || 0);
       if (phantomLbl) phantomLbl.textContent = setText(set.phantom || 0);
       if (vandalLbl) vandalLbl.textContent = setText(set.vandal || 0);
       if (operatorLbl) operatorLbl.textContent = setText(set.operator || 0);
+      if (ghostLbl) ghostLbl.textContent = setText(set.ghost || 0);
       if (cosLbl) cosLbl.textContent = setText(set.cosmetic || 0);
     }
 
@@ -1089,7 +1119,7 @@ const VP_PACKS = [
     function updateRunBtnState() {
       const runBtn = document.getElementById('calcBtn');
       if (!runBtn) return;
-      const anyChecked = ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkCosmetic']
+      const anyChecked = ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkGhost','chkCosmetic']
         .some(id => document.getElementById(id)?.checked);
       runBtn.disabled = !anyChecked;
     }
@@ -1098,7 +1128,7 @@ const VP_PACKS = [
     function enforceBundleRule() {
       const chkBundle = document.getElementById('chkBundle');
       const bp = document.getElementById('chkBP');
-      const lock = ['chkPhantom','chkVandal','chkOperator','chkCosmetic'];
+      const lock = ['chkPhantom','chkVandal','chkOperator','chkGhost','chkCosmetic'];
       if (!chkBundle) return;
 
       if (chkBundle.checked) {
@@ -1147,7 +1177,7 @@ const VP_PACKS = [
     }
 
     function clearItems() {
-      ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkCosmetic'].forEach(id => {
+      ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkGhost','chkCosmetic'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.checked = false;
       });
@@ -1258,7 +1288,7 @@ const VP_PACKS = [
 
       // Safety: if Bundle is checked, Melee/Weapon/Cosmetic must be off
       if (document.getElementById('chkBundle')?.checked) {
-        const illegal = ['chkPhantom','chkVandal','chkOperator','chkCosmetic'].some(id => document.getElementById(id)?.checked);
+        const illegal = ['chkPhantom','chkVandal','chkOperator','chkGhost','chkCosmetic'].some(id => document.getElementById(id)?.checked);
         if (illegal) {
           alert("Bundle is selected, so Melee/Weapon/Cosmetic are disabled. Untick Bundle to select them.");
           return false;
@@ -1288,8 +1318,12 @@ if (document.getElementById('chkPhantom')?.checked) {
         selections.push({ name: "Operator", vp: set.operator || 0 });
         requiredVP += (set.operator || 0);
       }
+      if (document.getElementById('chkGhost')?.checked) {
+        selections.push({ name: "Ghost", vp: set.ghost || 0 });
+        requiredVP += (set.ghost || 0);
+      }
       if (document.getElementById('chkCosmetic')?.checked) {
-        selections.push({ name: "Player Card / Spray / Gun Buddy", vp: set.cosmetic || 0 });
+        selections.push({ name: "Player Card / Spray / Gun Buddy/ Flex", vp: set.cosmetic || 0 });
         requiredVP += (set.cosmetic || 0);
       }
 
@@ -1306,9 +1340,40 @@ if (document.getElementById('chkPhantom')?.checked) {
         .map(([vp, c]) => `<b>${c}x</b> ${Number(vp).toLocaleString()} VP`)
         .join(" + ");
 
-      const bdItems = selections
-        .map(s => `• ${s.name} — <b>${(s.vp||0).toLocaleString()} VP</b>`)
-        .join("<br>");
+      // Dynamic VP breakdown per weapon (and bundle sub-breakdown).
+      const hasBundle = document.getElementById('chkBundle')?.checked;
+      const bundleParts = [
+        { key: 'phantom', label: 'Phantom' },
+        { key: 'vandal', label: 'Vandal' },
+        { key: 'operator', label: 'Operator' },
+        { key: 'ghost', label: 'Ghost' },
+        { key: 'cosmetic', label: 'Cosmetics' },
+      ];
+
+      const lines = [];
+      selections.forEach(s => {
+        // Bundle: show a nested per-item breakdown using the selected set.
+        if (hasBundle && s.name.startsWith('Bundle (')) {
+          const total = Number(set.bundle || 0);
+          lines.push(`• ${s.name} — <b>${total.toLocaleString()} VP</b>`);
+
+          const partsSum = bundleParts.reduce((acc, p) => acc + Number(set[p.key] || 0), 0);
+          bundleParts.forEach(p => {
+            const v = Number(set[p.key] || 0);
+            if (v > 0) lines.push(`&nbsp;&nbsp;↳ ${p.label}: <b>${v.toLocaleString()} VP</b>`);
+          });
+
+          const remainder = total - partsSum;
+          if (remainder !== 0) {
+            const sign = remainder > 0 ? '+' : '−';
+            lines.push(`&nbsp;&nbsp;↳ Other bundle items: <b>${sign}${Math.abs(remainder).toLocaleString()} VP</b>`);
+          }
+        } else {
+          lines.push(`• ${s.name} — <b>${Number(s.vp||0).toLocaleString()} VP</b>`);
+        }
+      });
+
+      const bdItems = lines.join("<br>");
 
       const bd = `<b>Bundle set:</b> ${setName}<br><br><b>Items:</b><br>${bdItems}<br><br><b>Top-up packs:</b> ${bdPacks || "—"}`;
 
