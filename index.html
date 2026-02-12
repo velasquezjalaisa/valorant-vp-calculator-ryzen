@@ -1,11 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VALORANT VP Calculator | Ryzen x Credx</title>
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VALORANT VP Calculator | Ryzen x Credx</title>
+<style>
     :root {
       --teal-primary: #008080;
       --teal-dark: #006666;
@@ -555,228 +555,300 @@
       filter: brightness(0.98);
     }
 
+
+
+
+/* === Sticky Progress Indicator === */
+#progressIndicator{
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+  background: rgba(248,250,252,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+}
+.progress-inner{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 10px 14px;
+  display:flex;
+  gap:10px;
+  justify-content: space-between;
+  align-items:center;
+}
+.prog-item{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  opacity: .55;
+  transition: opacity .2s ease;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+.prog-dot{
+  width:10px;height:10px;border-radius:999px;
+  background: var(--border-color);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.prog-item.active{opacity:1;}
+.prog-item.active .prog-dot{background: var(--verified-blue);}
+.prog-item.done{opacity:.9;}
+.prog-item.done .prog-dot{background: var(--teal-primary);}
+
+/* === Fixed Bottom Step 5 Checkout Bar === */
+#step5Card{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 1100;
+  border-radius: 0;
+  margin: 0;
+}
+#step5Card.cta-card{
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.18);
+}
+#step5Card .step5-mini{
+  display:none;
+  user-select:none;
+}
+
+/* Mobile auto-collapse */
+@media (max-width: 640px){
+  #step5Card{ padding-bottom: env(safe-area-inset-bottom); }
+  #step5Card .step5-mini{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding: 10px 14px;
+    margin: 10px 12px 0;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  #step5Card .step5-mini-left{ font-weight: 800; letter-spacing: .4px; color:#fff; }
+  #step5Card .step5-mini-right{ display:flex; align-items:center; gap:10px; color:#fff; font-weight:800; }
+  #miniChevron{ display:inline-block; transition: transform .2s ease; opacity:.9; }
+
+  #step5Card.collapsed{
+    transform: translateY(calc(100% - 74px));
+    transition: transform .22s ease;
+  }
+  #step5Card:not(.collapsed){
+    transform: translateY(0);
+    transition: transform .22s ease;
+  }
+  #step5Card.collapsed #miniChevron{ transform: rotate(180deg); }
+  #step5Card.collapsed .step5-body{
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+  }
+}
+
+/* Make room for fixed footer */
+body.has-fixed-footer{
+  padding-bottom: 160px;
+}
 </style>
 </head>
-
-<body data-theme="light">
-
-  <div class="header-wrapper">
-    <div class="brand-info">
-      <h1 class="brand-title">Ryzen Discounted Game Credits<span class="verified-badge">✔</span></h1>
-      <span class="brand-subtitle">Precision VP Engine</span>
-    </div>
-    <img src="Valorant_Logo.png" alt="Valorant Logo" class="official-logo" />
-    <img src="Logo_Default.png" alt="Ryzen Logo" class="official-logo" />
-  </div>
-
-  <div class="mode-switch">
-    <button id="btnUser" class="mode-btn active" onclick="showPanel('user')">User</button>
-    <button id="btnAdmin" class="mode-btn" onclick="showPanel('admin')">Admin 🔒</button>
-    <button class="mode-btn" onclick="toggleTheme()">🌓 Mode</button>
-  </div>
-
-  <div class="main-container">
-
-    <div id="panelUser" class="card">
-      <h2>VP Calculator</h2>
-
-      <div class="step-card">
-        <div class="step-head">
-          <div class="step-left">
-            <div class="step-badge">1</div>
-            <div>
-              <p class="step-title">Select Bundle</p>
-              <p class="step-sub">Pick the specific bundle from the dropdown.</p>
-            </div>
-          </div>
-          <div class="step-actions">
-            <span class="chip">Required</span>
-          </div>
-        </div>
-
-       
-        <div class="inline-row">
-          <select id="bundleSelector"></select>
-          <span class="chip" id="bundleVpChip">0 VP</span>
-        </div>
-        <p style="margin:10px 0 0; color: var(--text-light); font-size: 0.92rem;">
+<body data-theme="light"><div id="progressIndicator"><div class="progress-inner"><div class="prog-item" data-step="1"><span class="prog-dot"></span><span class="prog-label">1</span></div><div class="prog-item" data-step="2"><span class="prog-dot"></span><span class="prog-label">2</span></div><div class="prog-item" data-step="3"><span class="prog-dot"></span><span class="prog-label">3</span></div><div class="prog-item" data-step="4"><span class="prog-dot"></span><span class="prog-label">4</span></div><div class="prog-item" data-step="5"><span class="prog-dot"></span><span class="prog-label">5</span></div></div></div>
+<div class="header-wrapper">
+<div class="brand-info">
+<h1 class="brand-title">Ryzen Discounted Game Credits<span class="verified-badge">✔</span></h1>
+<span class="brand-subtitle">Precision VP Engine</span>
+</div>
+<img alt="Valorant Logo" class="official-logo" src="Valorant_Logo.png"/>
+<img alt="Ryzen Logo" class="official-logo" src="Logo_Default.png"/>
+</div>
+<div class="mode-switch">
+<button class="mode-btn active" id="btnUser" onclick="showPanel('user')">User</button>
+<button class="mode-btn" id="btnAdmin" onclick="showPanel('admin')">Admin 🔒</button>
+<button class="mode-btn" onclick="toggleTheme()">🌓 Mode</button>
+</div>
+<div class="main-container">
+<div class="card" id="panelUser">
+<h2>VP Calculator</h2>
+<div class="step-card">
+<div class="step-head">
+<div class="step-left">
+<div class="step-badge">1</div>
+<div>
+<p class="step-title">Select Bundle</p>
+<p class="step-sub">Pick the specific bundle from the dropdown.</p>
+</div>
+</div>
+<div class="step-actions">
+<span class="chip">Required</span>
+</div>
+</div>
+<div class="inline-row">
+<select id="bundleSelector"></select>
+<span class="chip" id="bundleVpChip">0 VP</span>
+</div>
+<p style="margin:10px 0 0; color: var(--text-light); font-size: 0.92rem;">
           If you’re buying a bundle, pick which bundle here. Then tick <b>Bundle</b> in Step 3.
         </p>
-
-      </div>
-
-      <div class="step-card">
-        <div class="step-head">
-          <div class="step-left">
-            <div class="step-badge">2</div>
-            <div>
-              <p class="step-title">Enter Current VP</p>
-              <p class="step-sub">Input your current VP so we can compute how much you still need.</p>
-            </div>
-          </div>
-          <div class="step-actions">
-            <span class="chip">Required</span>
-          </div>
-        </div>
-
-        <label>Current VP</label>
-        <input id="currentVP" type="number" min="0" placeholder="e.g. 350" />
-
-        
-      </div>
-
-      <div class="step-card">
-        <div class="step-head">
-          <div class="step-left">
-            <div class="step-badge">3</div>
-            <div>
-              <p class="step-title">Choose Order</p>
-              <p class="step-sub">Tick what you want to purchase (you can select multiple).</p>
-            </div>
-          </div>
-          <div class="step-actions">
-            <span class="chip">Multi-select</span>
-          </div>
-        </div>
-
-        <div class="checklist">
-          <label class="check-item">
-            <input type="checkbox" id="chkBundle" />
-            <div class="item-info">
-              <span class="item-name">Bundle</span>
-              <span class="note-tag hidden" id="bundleNote">Uses Step 1 selection</span>
-            </div>
-          </label>
-
-          <label class="check-item">
-            <input type="checkbox" id="chkBP" />
-            <div class="item-info">
-              <span class="item-name">Battle Pass (BP)</span>
-              <span class="vp-tag" id="lblBP">0 VP</span>
-            </div>
-          </label>
-
-          <label class="check-item">
-            <input type="checkbox" id="chkMelee" />
-            <div class="item-info">
-              <span class="item-name">Melee</span>
-              <span class="vp-tag" id="lblMelee">0 VP</span>
-            </div>
-          </label>
-
-          <label class="check-item">
-            <input type="checkbox" id="chkWeapon" />
-            <div class="item-info">
-              <span class="item-name">Weapon</span>
-              <span class="vp-tag" id="lblWeapon">0 VP</span>
-            </div>
-          </label>
-
-          <label class="check-item">
-            <input type="checkbox" id="chkCosmetic" />
-            <div class="item-info">
-              <span class="item-name">Player Card / Spray / Gun Buddy</span>
-              <span class="vp-tag" id="lblCosmetic">0 VP</span>
-            </div>
-          </label>
-
-          <div class="inline-row" style="gap:12px; margin-top:10px;">
-            <button class="btn btn-reset" style="width:auto;" onclick="selectCommon()">Select Bundle + BP</button>
-<button class="btn" id="calcBtn" style="width:auto;" onclick="handleCalculation()" disabled>Run Calculator</button>
-          </div>
-        </div>
-      </div>
+</div>
 <div class="step-card">
-        <div class="step-head">
-          <div class="step-left">
-            <div class="step-badge">4</div>
-            <div>
-              <p class="step-title">Results</p>
-              <p class="step-sub">We’ll recommend the cheapest VP top-up combo based on your needed VP.</p>
-            </div>
-          </div>
-          <div class="step-actions">
-            <button class="btn btn-reset" style="width:auto; padding:10px 14px; margin:0;" onclick="resetCalculator()">Reset</button>
-            <button class="btn btn-mini btn-pricelist" style="margin:0;" onclick="openPriceList()">Pricelist</button>
-          </div>
-        </div>
-
-
-		<div class="stats-box result-card">
-            <div class="result-title">
-              <h3>Optimized Cost</h3>
-              <span class="result-pill">Best Value</span>
-            </div>
-
-            <div class="stat-row"><span>Needed VP:</span> <span id="resNeedVP">0 VP</span></div>
-            <div class="stat-row"><span>Top-up VP:</span> <span id="resTopVP">0 VP</span></div>
-            <div class="stat-total">₱<span id="resPHP">0.00</span></div>
-            <div id="vpBreakdown" class="breakdown">Selection results will appear here.</div>
-          </div>
-
-          </div>
-
-<div class="step-card cta-card">
-        <div class="step-head" style="margin-bottom: 0;">
-          <div class="step-left">
-            <div class="step-badge" style="background:#fff; color:#0f172a;">5</div>
-            <div>
-              <p class="step-title" style="color:#fff;">ORDER NOW</p>
-              <p class="step-sub" style="color:rgba(255,255,255,0.9);">Send your VP order note via Messenger.</p>
-            </div>
-          </div>
-        </div>
-
-        <p>Tap the button to copy your order note and open Messenger.</p>
-
-        <button class="btn btn-cta" onclick="orderNow()">ORDER NOW!</button>
-      </div>
-
-      <div class="footer-note">
-        Top up your VALORANT VP at discounted prices only at <br><b>Ryzen Discounted Game Credits!</b><br>
-        Order now: <a href="https://m.me/ryzendiscountedgamecredits" target="_blank" rel="noopener">m.me/ryzendiscountedgamecredits</a><br>
-        <span class="warning-text">Always look for blue check! Beware of posers.</span>
-      </div>
-
-      <div class="footer-note">
-        <b>Want another VP template added?</b><br>
+<div class="step-head">
+<div class="step-left">
+<div class="step-badge">2</div>
+<div>
+<p class="step-title">Enter Current VP</p>
+<p class="step-sub">Input your current VP so we can compute how much you still need.</p>
+</div>
+</div>
+<div class="step-actions">
+<span class="chip">Required</span>
+</div>
+</div>
+<label>Current VP</label>
+<input id="currentVP" min="0" placeholder="e.g. 350" type="number"/>
+</div>
+<div class="step-card">
+<div class="step-head">
+<div class="step-left">
+<div class="step-badge">3</div>
+<div>
+<p class="step-title">Choose Order</p>
+<p class="step-sub">Tick what you want to purchase (you can select multiple).</p>
+</div>
+</div>
+<div class="step-actions">
+<span class="chip">Multi-select</span>
+</div>
+</div>
+<div class="checklist">
+<label class="check-item">
+<input id="chkBundle" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Bundle</span>
+<span class="note-tag hidden" id="bundleNote">Uses Step 1 selection</span>
+</div>
+</label>
+<label class="check-item">
+<input id="chkBP" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Battle Pass (BP)</span>
+<span class="vp-tag" id="lblBP">0 VP</span>
+</div>
+</label>
+<label class="check-item">
+<input id="chkPhantom" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Phantom</span>
+<span class="vp-tag" id="lblPhantom">0 VP</span>
+</div>
+</label>
+<label class="check-item">
+<input id="chkVandal" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Vandal</span>
+<span class="vp-tag" id="lblVandal">0 VP</span>
+</div>
+</label>
+<label class="check-item">
+<input id="chkOperator" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Operator</span>
+<span class="vp-tag" id="lblOperator">0 VP</span>
+</div>
+</label>
+<label class="check-item">
+<input id="chkCosmetic" type="checkbox"/>
+<div class="item-info">
+<span class="item-name">Player Card / Spray / Gun Buddy</span>
+<span class="vp-tag" id="lblCosmetic">0 VP</span>
+</div>
+</label>
+<div class="inline-row" style="gap:12px; margin-top:10px;">
+<button class="btn btn-reset" onclick="selectCommon()" style="width:auto;">Select Bundle + BP</button>
+<button class="btn" disabled="" id="calcBtn" onclick="handleCalculation()" style="width:auto;">Run Calculator</button>
+</div>
+</div>
+</div>
+<div class="step-card">
+<div class="step-head">
+<div class="step-left">
+<div class="step-badge">4</div>
+<div>
+<p class="step-title">Results</p>
+<p class="step-sub">We’ll recommend the cheapest VP top-up combo based on your needed VP.</p>
+</div>
+</div>
+<div class="step-actions">
+<button class="btn btn-reset" onclick="resetCalculator()" style="width:auto; padding:10px 14px; margin:0;">Reset</button>
+<button class="btn btn-mini btn-pricelist" onclick="openPriceList()" style="margin:0;">Pricelist</button>
+</div>
+</div>
+<div class="stats-box result-card">
+<div class="result-title">
+<h3>Optimized Cost</h3>
+<span class="result-pill">Best Value</span>
+</div>
+<div class="stat-row"><span>Needed VP:</span> <span id="resNeedVP">0 VP</span></div>
+<div class="stat-row"><span>Top-up VP:</span> <span id="resTopVP">0 VP</span></div>
+<div class="stat-total">₱<span id="resPHP">0.00</span></div>
+<div class="breakdown" id="vpBreakdown">Selection results will appear here.</div>
+</div>
+</div>
+<div class="step-card cta-card" id="step5Card">
+<div class="step-head" style="margin-bottom: 0;">
+<div class="step-left">
+<div class="step-badge" style="background:#fff; color:#0f172a;">5</div>
+<div>
+<p class="step-title" style="color:#fff;">ORDER NOW</p>
+<p class="step-sub" style="color:rgba(255,255,255,0.9);">Send your VP order note via Messenger.</p>
+</div>
+</div>
+</div><div class="step5-mini"><div class="step5-mini-left">Checkout</div><div class="step5-mini-right"><span id="miniTotal">₱0.00</span><span id="miniChevron">▲</span></div></div><div class="step5-body">
+<p>Tap the button to copy your order note and open Messenger.</p>
+<button class="btn btn-cta" onclick="orderNow()">ORDER NOW!</button>
+</div></div>
+<div class="footer-note">
+        Top up your VALORANT VP at discounted prices only at <br/><b>Ryzen Discounted Game Credits!</b><br/>
+        Order now: <a href="https://m.me/ryzendiscountedgamecredits" rel="noopener" target="_blank">m.me/ryzendiscountedgamecredits</a><br/>
+<span class="warning-text">Always look for blue check! Beware of posers.</span>
+</div>
+<div class="footer-note">
+<b>Want another VP template added?</b><br/>
         Email us at: ryzendiscountedgamecredits@gmail.com
       </div>
-    </div>
-
-    <div id="panelAdmin" class="card hidden">
-      <h2 style="margin:0;">Admin Panel</h2>
-      <button class="btn btn-reset" style="width: auto; padding: 5px 10px; float: right;" onclick="lockAdmin()">Lock</button>
-      <div style="clear:both; padding-top:10px;"></div>
-
-      </div>
-
-  </div>
-
-  <!-- Pricelist Modal -->
-  <div class="modal-overlay" id="priceModal" role="dialog" aria-modal="true" aria-labelledby="priceTitle">
-    <div class="modal">
-      <div class="modal-head">
-        <h3 class="modal-title" id="priceTitle">VP Pricelist</h3>
-        <button class="btn btn-mini btn-ghost" onclick="closePriceList()">Close</button>
-      </div>
-      <div class="modal-body">
-        <table class="price-table">
-          <thead>
-            <tr>
-              <th>VP</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody id="priceListBody">
-            <!-- Filled by JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script>
+</div>
+<div class="card hidden" id="panelAdmin">
+<h2 style="margin:0;">Admin Panel</h2>
+<button class="btn btn-reset" onclick="lockAdmin()" style="width: auto; padding: 5px 10px; float: right;">Lock</button>
+<div style="clear:both; padding-top:10px;"></div>
+</div>
+</div>
+<!-- Pricelist Modal -->
+<div aria-labelledby="priceTitle" aria-modal="true" class="modal-overlay" id="priceModal" role="dialog">
+<div class="modal">
+<div class="modal-head">
+<h3 class="modal-title" id="priceTitle">VP Pricelist</h3>
+<button class="btn btn-mini btn-ghost" onclick="closePriceList()">Close</button>
+</div>
+<div class="modal-body">
+<table class="price-table">
+<thead>
+<tr>
+<th>VP</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody id="priceListBody">
+<!-- Filled by JS -->
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script>
 const VP_PACKS = [
       { vp: 475, php: 194 },
       { vp: 1000, php: 385 },
@@ -795,17 +867,28 @@ const VP_PACKS = [
 
     // Bundle Sets: each set defines VP costs for items. Admin can edit these.
     const DEFAULT_BUNDLE_SETS = {
-      "RUN IT BACK: REAVER 3.0 BUNDLE": { bundle: 8720, bp: 1000, melee: 0, weapon: 1775, cosmetic: 0 },
-      "AYAKASHI BUNDLE": { bundle: 7160, bp: 1000, melee: 5350, weapon: 2375, cosmetic: 0 }
+      "RUN IT BACK: LUNAR 26 CAPSULE": {bundle: 8825, bp:1000, phantom:2175, vandal:1775, operator:1775, cosmetic: 1575} 
     };
 
     function loadBundleSets() {
+      // IMPORTANT:
+      // If the user already has a saved DB in localStorage, we *merge* it with defaults.
+      // This ensures newly-added default bundles (e.g., Lunar) appear automatically.
+      let saved = null;
       try {
-        const saved = JSON.parse(localStorage.getItem('vpBundleSetsDb') || 'null');
-        if (saved && Object.keys(saved).length > 0) return saved;
+        saved = JSON.parse(localStorage.getItem('vpBundleSetsDb') || 'null');
+      } catch (e) {
+        saved = null;
+      }
+
+      const merged = { ...DEFAULT_BUNDLE_SETS, ...(saved && typeof saved === 'object' ? saved : {}) };
+
+      // If nothing was saved yet, or merge introduced new defaults, persist the merged version.
+      try {
+        localStorage.setItem('vpBundleSetsDb', JSON.stringify(merged));
       } catch (e) {}
-      localStorage.setItem('vpBundleSetsDb', JSON.stringify(DEFAULT_BUNDLE_SETS));
-      return { ...DEFAULT_BUNDLE_SETS };
+
+      return merged;
     }
 
     let bundleSets = loadBundleSets();
@@ -833,7 +916,7 @@ const VP_PACKS = [
         });
       }
 
-      ['chkBundle','chkBP','chkMelee','chkWeapon','chkCosmetic'].forEach(id => {
+      ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkCosmetic'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', () => {
           enforceBundleRule();
@@ -886,7 +969,7 @@ const VP_PACKS = [
               </span>
             </div>
             <div style="color: var(--text-light); font-size: 0.92rem;">
-              Bundle: <b>${(s.bundle||0).toLocaleString()}</b> • BP: <b>${(s.bp||0).toLocaleString()}</b> • Melee: <b>${(s.melee||0).toLocaleString()}</b> • Weapon: <b>${(s.weapon||0).toLocaleString()}</b> • Cosmetic: <b>${(s.cosmetic||0).toLocaleString()}</b>
+              Bundle: <b>${(s.bundle||0).toLocaleString()}</b> • BP: <b>${(s.bp||0).toLocaleString()}</b> • Phantom: <b>${(s.phantom||0).toLocaleString()}</b> • Vandal: <b>${(s.vandal||0).toLocaleString()}</b> • Operator: <b>${(s.operator||0).toLocaleString()}</b> • Cosmetics: <b>${(s.cosmetic||0).toLocaleString()}</b>
             </div>
           </div>`;
         });
@@ -897,18 +980,19 @@ const VP_PACKS = [
       const set = getSelectedSet();
       if (!set) return;
 
-      // Update the muted VP text next to items
       const setText = (vp) => vp ? vp.toLocaleString() + " VP" : "0 VP";
 
       const bpLbl = document.getElementById('lblBP');
-      const meleeLbl = document.getElementById('lblMelee');
-      const weaponLbl = document.getElementById('lblWeapon');
+      const phantomLbl = document.getElementById('lblPhantom');
+      const vandalLbl = document.getElementById('lblVandal');
+      const operatorLbl = document.getElementById('lblOperator');
       const cosLbl = document.getElementById('lblCosmetic');
 
-      if (bpLbl) bpLbl.textContent = setText(set.bp||0);
-      if (meleeLbl) meleeLbl.textContent = setText(set.melee||0);
-      if (weaponLbl) weaponLbl.textContent = setText(set.weapon||0);
-      if (cosLbl) cosLbl.textContent = setText(set.cosmetic||0);
+      if (bpLbl) bpLbl.textContent = setText(set.bp || 0);
+      if (phantomLbl) phantomLbl.textContent = setText(set.phantom || 0);
+      if (vandalLbl) vandalLbl.textContent = setText(set.vandal || 0);
+      if (operatorLbl) operatorLbl.textContent = setText(set.operator || 0);
+      if (cosLbl) cosLbl.textContent = setText(set.cosmetic || 0);
     }
 
     function updateBundleChip() {
@@ -934,16 +1018,16 @@ const VP_PACKS = [
     function updateRunBtnState() {
       const runBtn = document.getElementById('calcBtn');
       if (!runBtn) return;
-      const anyChecked = ['chkBundle','chkBP','chkMelee','chkWeapon','chkCosmetic']
+      const anyChecked = ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkCosmetic']
         .some(id => document.getElementById(id)?.checked);
       runBtn.disabled = !anyChecked;
     }
 
-    // If Bundle is checked: disable Melee/Weapon/Cosmetic (BP stays available)
+    // If Bundle is checked: disable Phantom/Vandal/Operator/Cosmetics (BP stays available)
     function enforceBundleRule() {
       const chkBundle = document.getElementById('chkBundle');
       const bp = document.getElementById('chkBP');
-      const lock = ['chkMelee','chkWeapon','chkCosmetic'];
+      const lock = ['chkPhantom','chkVandal','chkOperator','chkCosmetic'];
       if (!chkBundle) return;
 
       if (chkBundle.checked) {
@@ -992,7 +1076,7 @@ const VP_PACKS = [
     }
 
     function clearItems() {
-      ['chkBundle','chkBP','chkMelee','chkWeapon','chkCosmetic'].forEach(id => {
+      ['chkBundle','chkBP','chkPhantom','chkVandal','chkOperator','chkCosmetic'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.checked = false;
       });
@@ -1071,7 +1155,7 @@ const VP_PACKS = [
 
       // Safety: if Bundle is checked, Melee/Weapon/Cosmetic must be off
       if (document.getElementById('chkBundle')?.checked) {
-        const illegal = ['chkMelee','chkWeapon','chkCosmetic'].some(id => document.getElementById(id)?.checked);
+        const illegal = ['chkPhantom','chkVandal','chkOperator','chkCosmetic'].some(id => document.getElementById(id)?.checked);
         if (illegal) {
           alert("Bundle is selected, so Melee/Weapon/Cosmetic are disabled. Untick Bundle to select them.");
           return false;
@@ -1089,13 +1173,17 @@ const VP_PACKS = [
         selections.push({ name: "Battle Pass (BP)", vp: set.bp || 0 });
         requiredVP += (set.bp || 0);
       }
-      if (document.getElementById('chkMelee')?.checked) {
-        selections.push({ name: "Melee", vp: set.melee || 0 });
-        requiredVP += (set.melee || 0);
+if (document.getElementById('chkPhantom')?.checked) {
+        selections.push({ name: "Phantom", vp: set.phantom || 0 });
+        requiredVP += (set.phantom || 0);
       }
-      if (document.getElementById('chkWeapon')?.checked) {
-        selections.push({ name: "Weapon", vp: set.weapon || 0 });
-        requiredVP += (set.weapon || 0);
+      if (document.getElementById('chkVandal')?.checked) {
+        selections.push({ name: "Vandal", vp: set.vandal || 0 });
+        requiredVP += (set.vandal || 0);
+      }
+      if (document.getElementById('chkOperator')?.checked) {
+        selections.push({ name: "Operator", vp: set.operator || 0 });
+        requiredVP += (set.operator || 0);
       }
       if (document.getElementById('chkCosmetic')?.checked) {
         selections.push({ name: "Player Card / Spray / Gun Buddy", vp: set.cosmetic || 0 });
@@ -1226,8 +1314,9 @@ ${itemsText}
       const name = document.getElementById('adminBundleName')?.value.trim();
       const bundle = parseInt(document.getElementById('adminBundleVP')?.value, 10) || 0;
       const bp = parseInt(document.getElementById('adminBPVP')?.value, 10) || 0;
-      const melee = parseInt(document.getElementById('adminMeleeVP')?.value, 10) || 0;
-      const weapon = parseInt(document.getElementById('adminWeaponVP')?.value, 10) || 0;
+      const phantom = parseInt(document.getElementById('adminPhantomVP')?.value, 10) || parseInt(document.getElementById('adminWeaponVP')?.value, 10) || 0;
+      const vandal = parseInt(document.getElementById('adminVandalVP')?.value, 10) || 0;
+      const operator = parseInt(document.getElementById('adminOperatorVP')?.value, 10) || 0;
       const cosmetic = parseInt(document.getElementById('adminCosmeticVP')?.value, 10) || 0;
 
       if (!name) {
@@ -1235,7 +1324,7 @@ ${itemsText}
         return;
       }
 
-      bundleSets[name] = { bundle, bp, melee, weapon, cosmetic };
+      bundleSets[name] = { bundle, bp, phantom, vandal, operator, cosmetic };
       localStorage.setItem('vpBundleSetsDb', JSON.stringify(bundleSets));
       refreshUI();
       syncItemLabels();
@@ -1249,8 +1338,10 @@ ${itemsText}
       document.getElementById('adminBundleName').value = name;
       document.getElementById('adminBundleVP').value = s.bundle || 0;
       document.getElementById('adminBPVP').value = s.bp || 0;
-      document.getElementById('adminMeleeVP').value = s.melee || 0;
-      document.getElementById('adminWeaponVP').value = s.weapon || 0;
+      if (document.getElementById('adminPhantomVP')) document.getElementById('adminPhantomVP').value = s.phantom || 0;
+      if (document.getElementById('adminVandalVP')) document.getElementById('adminVandalVP').value = s.vandal || 0;
+      if (document.getElementById('adminOperatorVP')) document.getElementById('adminOperatorVP').value = s.operator || 0;
+      if (document.getElementById('adminWeaponVP')) document.getElementById('adminWeaponVP').value = s.phantom || 0;
       document.getElementById('adminCosmeticVP').value = s.cosmetic || 0;
       document.getElementById('adminBundleName').focus();
     }
@@ -1277,7 +1368,128 @@ ${itemsText}
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePriceList();
     });
-</script>
 
+
+// === Fixed Footer + Mobile Auto-Collapse + Progress Indicator ===
+(function(){
+  const footer = document.getElementById('step5Card');
+  const mini = footer?.querySelector('.step5-mini');
+  const miniTotal = document.getElementById('miniTotal');
+  const resPHP = document.getElementById('resPHP');
+
+  function setBodyPadding(){
+    if(!footer) return;
+    document.body.classList.add('has-fixed-footer');
+    // Keep padding in sync with actual footer height (desktop)
+    if (window.innerWidth > 640) {
+      const h = footer.offsetHeight || 160;
+      document.body.style.paddingBottom = (h + 24) + "px";
+    } else {
+      // Mobile: collapsed state handles overlap; keep smaller base padding
+      document.body.style.paddingBottom = "120px";
+    }
+  }
+
+  function syncMiniTotal(){
+    if(!miniTotal || !resPHP) return;
+    const v = (resPHP.textContent || "0.00").trim();
+    miniTotal.textContent = "₱" + v;
+  }
+
+  // Observe total changes to keep mini bar updated
+  if (resPHP && miniTotal) {
+    const obs = new MutationObserver(syncMiniTotal);
+    obs.observe(resPHP, { childList:true, characterData:true, subtree:true });
+    syncMiniTotal();
+  }
+
+  // Scroll-driven collapse on mobile
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  function handleScroll(){
+    if(!footer) return;
+
+    const isMobile = window.innerWidth <= 640;
+    if (isMobile) {
+      const y = window.scrollY;
+      const dy = y - lastY;
+
+      // If scrolling down, collapse; if scrolling up, expand
+      if (dy > 10) footer.classList.add('collapsed');
+      if (dy < -10) footer.classList.remove('collapsed');
+
+      lastY = y;
+    } else {
+      footer.classList.remove('collapsed');
+    }
+
+    updateProgress();
+  }
+
+  // Tap mini bar to toggle (mobile)
+  if (mini && footer) {
+    mini.addEventListener('click', () => {
+      if (window.innerWidth > 640) return;
+      footer.classList.toggle('collapsed');
+    });
+  }
+
+  // Progress indicator (based on nearest step-card)
+  const progress = document.getElementById('progressIndicator');
+  const progItems = progress ? Array.from(progress.querySelectorAll('.prog-item')) : [];
+  let stepCards = [];
+
+  function indexStepCards(){
+    stepCards = Array.from(document.querySelectorAll('.step-card')).map(card => {
+      const badge = card.querySelector('.step-badge');
+      const n = badge ? parseInt((badge.textContent || "").trim(), 10) : NaN;
+      return { n, el: card };
+    }).filter(x => Number.isFinite(x.n));
+  }
+
+  function updateProgress(){
+    if(!progItems.length) return;
+    if(!stepCards.length) indexStepCards();
+
+    const y = window.scrollY + 140; // offset for header/progress
+    let current = 1;
+    for (const s of stepCards) {
+      const top = s.el.getBoundingClientRect().top + window.scrollY;
+      if (top <= y) current = Math.max(current, s.n);
+    }
+
+    progItems.forEach(it => {
+      const n = parseInt(it.getAttribute('data-step') || "0", 10);
+      it.classList.toggle('active', n === current);
+      it.classList.toggle('done', n < current);
+    });
+  }
+
+  function onResize(){
+    setBodyPadding();
+    indexStepCards();
+    updateProgress();
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        handleScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive:true });
+
+  window.addEventListener('resize', onResize);
+  window.addEventListener('load', onResize);
+
+  // initial
+  setBodyPadding();
+  indexStepCards();
+  updateProgress();
+})();
+</script>
 </body>
 </html>
