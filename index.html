@@ -654,6 +654,65 @@
 body.has-fixed-footer{
   padding-bottom: 160px;
 }
+
+    /* === Step 3 Action Buttons (Mobile Friendly) === */
+    .step3-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .step3-actions .btn{
+      width:auto;
+      flex: 1 1 200px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      position: relative;
+    }
+    @media (max-width: 640px){
+      .step3-actions{ flex-direction: column; }
+      .step3-actions .btn{ width:100%; flex: 0 0 auto; }
+    }
+
+    /* Primary Green: Select Bundle + BP */
+    .btn-primary-green{
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 4px 0 #166534;
+      color:#fff;
+    }
+    .btn-primary-green:hover{ filter: brightness(0.98); }
+    .btn-primary-green:active{ transform: translateY(2px); box-shadow: 0 2px 0 #166534; }
+
+    /* Dark Green: Run Calculator */
+    .btn-dark-green{
+      background: #0f3f2e;
+      color: #d1fae5;
+      box-shadow: 0 4px 0 #0a2a1f;
+      border: 1px solid rgba(34,197,94,0.25);
+    }
+    .btn-dark-green:hover{ background:#14532d; }
+    .btn-dark-green:active{ transform: translateY(2px); box-shadow: 0 2px 0 #0a2a1f; }
+
+    /* Loading spinner (Run Calculator) */
+    #calcBtn .btn-spinner{
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(209,250,229,0.35);
+      border-top-color: rgba(209,250,229,0.95);
+      border-radius: 999px;
+      display:none;
+    }
+    #calcBtn.is-loading{ cursor: not-allowed; opacity: 0.9; }
+    #calcBtn.is-loading .btn-spinner{
+      display:inline-block;
+      animation: spin 0.8s linear infinite;
+    }
+    #calcBtn.is-loading .btn-icon{ display:none; }
+    #calcBtn.is-loading .btn-label::after{ content:"…"; }
+    @keyframes spin{ to{ transform: rotate(360deg);} }
+
 </style>
 </head>
 <body data-theme="light"><div id="progressIndicator"><div class="progress-inner"><div class="prog-item" data-step="1"><span class="prog-dot"></span><span class="prog-label">1</span></div><div class="prog-item" data-step="2"><span class="prog-dot"></span><span class="prog-label">2</span></div><div class="prog-item" data-step="3"><span class="prog-dot"></span><span class="prog-label">3</span></div><div class="prog-item" data-step="4"><span class="prog-dot"></span><span class="prog-label">4</span></div><div class="prog-item" data-step="5"><span class="prog-dot"></span><span class="prog-label">5</span></div></div></div>
@@ -766,9 +825,21 @@ body.has-fixed-footer{
 <span class="vp-tag" id="lblCosmetic">0 VP</span>
 </div>
 </label>
-<div class="inline-row" style="gap:12px; margin-top:10px;">
-<button class="btn btn-reset" onclick="selectCommon()" style="width:auto;">Select Bundle + BP</button>
-<button class="btn" disabled="" id="calcBtn" onclick="handleCalculation()" style="width:auto;">Run Calculator</button>
+<div class="step3-actions">
+<button class="btn btn-primary-green" id="selectCommonBtn" onclick="selectCommon()">
+    <span class="btn-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M3 7l9-4 9 4-9 4-9-4z" stroke="white" stroke-width="2"/>
+        <path d="M3 12l9 4 9-4" stroke="white" stroke-width="2"/>
+        <path d="M3 17l9 4 9-4" stroke="white" stroke-width="2"/>
+      </svg>
+    </span>
+    <span class="btn-label">Select Bundle + BP</span>
+</button>
+<button class="btn btn-dark-green" disabled="" id="calcBtn" onclick="handleCalculation()">
+    <span class="btn-spinner" aria-hidden="true"></span>
+    <span class="btn-label">Run Calculator</span>
+</button>
 </div>
 </div>
 </div>
@@ -1127,19 +1198,51 @@ const VP_PACKS = [
       return { topVP: bestIdx, php: dp[bestIdx], counts };
     }
 
-    function handleCalculation() {
+    function setCalcLoading(isLoading){
       const btn = document.getElementById('calcBtn');
-      const originalText = btn.innerText;
+      if (!btn) return;
+      btn.classList.toggle('is-loading', isLoading);
 
-      const ok = calculate();
-      if (ok !== false) {
-        btn.innerText = "Calculation Success!";
+      if (isLoading) {
+        btn.dataset.prevDisabled = String(btn.disabled);
+        btn.disabled = true;
+      } else {
+        const prev = btn.dataset.prevDisabled === "true";
+        btn.disabled = prev; // updateRunBtnState() will correct this immediately after
+        delete btn.dataset.prevDisabled;
+      }
+    }
+
+    async function handleCalculation() {
+      const btn = document.getElementById('calcBtn');
+      if (!btn) return;
+
+      // Respect existing disabled state (no selections)
+      if (btn.disabled) return;
+
+      const label = btn.querySelector('.btn-label');
+      const originalLabel = label ? label.textContent : "Run Calculator";
+
+      setCalcLoading(true);
+
+      try{
+        // Allow UI to repaint so spinner shows
+        await new Promise(requestAnimationFrame);
+
+        const ok = calculate();
+        if (ok === false) return;
+
+        // Success flash
         btn.classList.add('btn-success');
-
+        if (label) label.textContent = "Calculation Success!";
         setTimeout(() => {
-          btn.innerText = originalText;
           btn.classList.remove('btn-success');
+          if (label) label.textContent = originalLabel;
         }, 1200);
+      } finally {
+        // Re-evaluate enabled state based on selections
+        setCalcLoading(false);
+        updateRunBtnState();
       }
     }
 
