@@ -715,6 +715,26 @@ body.has-fixed-footer{
     #calcBtn.is-loading .btn-label::after{ content:"…"; }
     @keyframes spin{ to{ transform: rotate(360deg);} }
 
+
+    .extra-banner{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.35);
+      color: #bbf7d0;
+      font-weight: 700;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .extra-banner .sub{
+      font-weight:600;
+      color: rgba(209,250,229,0.85);
+      font-size:0.92rem;
+    }
+    .hidden{ display:none !important; }
 </style>
 </head>
 <body data-theme="light"><div id="progressIndicator"><div class="progress-inner"><div class="prog-item" data-step="1"><span class="prog-dot"></span><span class="prog-label">1</span></div><div class="prog-item" data-step="2"><span class="prog-dot"></span><span class="prog-label">2</span></div><div class="prog-item" data-step="3"><span class="prog-dot"></span><span class="prog-label">3</span></div><div class="prog-item" data-step="4"><span class="prog-dot"></span><span class="prog-label">4</span></div><div class="prog-item" data-step="5"><span class="prog-dot"></span><span class="prog-label">5</span></div></div></div>
@@ -751,9 +771,6 @@ body.has-fixed-footer{
 <select id="bundleSelector"></select>
 <span class="chip" id="bundleVpChip">0 VP</span>
 </div>
-<p style="margin:10px 0 0; color: var(--text-light); font-size: 0.92rem;">
-          If you’re buying a bundle, pick which bundle here. Then tick <b>Bundle</b> in Step 3.
-        </p>
 </div>
 <div class="step-card">
 <div class="step-head">
@@ -830,7 +847,7 @@ body.has-fixed-footer{
 <label class="check-item">
 <input id="chkCosmetic" type="checkbox"/>
 <div class="item-info">
-<span class="item-name">Player Card / Spray / Gun Buddy / Flex / Flex</span>
+<span class="item-name">Player Card / Spray / Gun Buddy / Flex</span>
 <span class="vp-tag" id="lblCosmetic">0 VP</span>
 </div>
 </label>
@@ -873,6 +890,7 @@ body.has-fixed-footer{
 </div>
 <div class="stat-row"><span>Needed VP:</span> <span id="resNeedVP">0 VP</span></div>
 <div class="stat-row"><span>Top-up VP:</span> <span id="resTopVP">0 VP</span></div>
+<div id="extraVpBanner" class="extra-banner hidden"></div>
 <div class="stat-row subtle"><span>Value:</span> <span id="resValue">—</span></div>
 <div class="stat-total">₱<span id="resPHP">0.00</span></div>
 <div class="breakdown" id="vpBreakdown">Selection results will appear here.</div>
@@ -1326,7 +1344,7 @@ if (document.getElementById('chkPhantom')?.checked) {
         requiredVP += (set.ghost || 0);
       }
       if (document.getElementById('chkCosmetic')?.checked) {
-        selections.push({ name: "Player Card / Spray / Gun Buddy / Flex / Flex", vp: set.cosmetic || 0 });
+        selections.push({ name: "Player Card / Spray / Gun Buddy / Flex", vp: set.cosmetic || 0 });
         requiredVP += (set.cosmetic || 0);
       }
 
@@ -1365,12 +1383,6 @@ if (document.getElementById('chkPhantom')?.checked) {
             const v = Number(set[p.key] || 0);
             if (v > 0) lines.push(`&nbsp;&nbsp;↳ ${p.label}: <b>${v.toLocaleString()} VP</b>`);
           });
-
-          const remainder = total - partsSum;
-          if (remainder !== 0) {
-            const sign = remainder > 0 ? '+' : '−';
-            lines.push(`&nbsp;&nbsp;↳ Other bundle items: <b>${sign}${Math.abs(remainder).toLocaleString()} VP</b>`);
-          }
         } else {
           lines.push(`• ${s.name} — <b>${Number(s.vp||0).toLocaleString()} VP</b>`);
         }
@@ -1380,11 +1392,11 @@ if (document.getElementById('chkPhantom')?.checked) {
 
       const bd = `<b>Bundle set:</b> ${setName}<br><br><b>Items:</b><br>${bdItems}<br><br><b>Top-up packs:</b> ${bdPacks || "—"}`;
 
-      updateDisplay(neededVP, combo.topVP, combo.php, bd);
-
       window.__lastVPSelections = selections;
       window.__lastRequiredVP = requiredVP;
       window.__lastSetName = setName;
+
+      updateDisplay(neededVP, combo.topVP, combo.php, bd);
 
       return true;
     }
@@ -1392,8 +1404,26 @@ if (document.getElementById('chkPhantom')?.checked) {
     function updateDisplay(needVP, topVP, php, bd) {
       document.getElementById('resNeedVP').innerText = needVP.toLocaleString() + ' VP';
       document.getElementById('resTopVP').innerText = topVP.toLocaleString() + ' VP';
-      document.getElementById('resPHP').innerText = php.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('resPHP').innerText = php.toLocaleString(undefined, { minimumFractionDigits: 2 });
       document.getElementById('vpBreakdown').innerHTML = (bd || "—");
+
+      // ✅ Extra VP banner: based on total selected VP (not reduced by current balance)
+      const selections = window.__lastVPSelections || [];
+      const totalSelectedVP = selections.reduce((acc, s) => acc + Number(s.vp || 0), 0);
+      const top = Number(topVP || 0);
+      const extraVP = Math.max(0, top - Math.min(top, totalSelectedVP));
+
+      const banner = document.getElementById('extraVpBanner');
+      if (banner) {
+        if (extraVP > 0 && php > 0) {
+          banner.classList.remove('hidden');
+          banner.innerHTML = `<span>You get <span style="color:#22c55e;">+${extraVP.toLocaleString()} VP</span> extra</span><span class="sub">after buying selected items</span>`;
+        } else {
+          banner.classList.add('hidden');
+          banner.innerHTML = '';
+        }
+      }
+
       const valueEl = document.getElementById('resValue');
       if (valueEl) {
         if (php > 0) {
@@ -1403,12 +1433,11 @@ if (document.getElementById('chkPhantom')?.checked) {
           valueEl.innerText = '—';
         }
       }
+
       const pill = document.getElementById('bestValuePill');
       if (pill) pill.style.display = (php > 0 ? 'inline-flex' : 'none');
-
     }
 
-    
     function renderPriceList() {
       const body = document.getElementById('priceListBody');
       if (!body) return;
